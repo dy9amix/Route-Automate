@@ -13,6 +13,6 @@ def check_availability(source_addr, dest_addr):
     }
     result = api(cmd='/ping', **params)
     ping_arr = list(result)
-    print(ping_arr[len(ping_arr)-1]  )
+    print(ping_arr[len(ping_arr)-1] )
 
 check_availability('41.78.211.50','41.78.211.117')
