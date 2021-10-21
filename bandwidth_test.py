@@ -52,6 +52,9 @@ def db_access():
 
     # Fetch the service account key JSON file contents
     cred_path = os.getcwd() + '/secrect.json'
+    f = open(cred_path,'r')
+    content = f.read()
+    print(content) 
     cred = credentials.Certificate(cred_path)
     # Initialize the app with a service account, granting admin privileges
     firebase_admin.initialize_app(cred, {
