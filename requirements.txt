@@ -3,4 +3,4 @@ urllib3==1.25.8
 librouteros==3.1.0
 paramiko==2.7.2
 requests==2.22.0
-firebase_admin==5.0.2
+firebase_admin
