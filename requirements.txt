@@ -1,5 +1,5 @@
 influxdb_client==1.21.0
-urllib3==1.25.8
+urllib3==1.26.5
 librouteros==3.1.0
 paramiko==2.7.2
 requests==2.22.0
