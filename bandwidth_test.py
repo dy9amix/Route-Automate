@@ -15,6 +15,10 @@ import time
 import datetime
 import requests
 import json
+from requests import get
+
+ip = get('https://api.ipify.org').text
+print(f'My public IP address is: {ip}')
 
 ssh_client=paramiko.SSHClient()
 urllib3.disable_warnings()
@@ -150,7 +154,7 @@ def check_interface_speed(mkt_ip):
 
 pop_ips = db_access()
 for ip in pop_ips:
-  source = '41.78.211.50'
+  source = ''
   destination = '41.78.211.117'
   runInParallel([{'name':perform_speedtest, 'args':[f'{source}',f'{destination}']},
                   {'name':check_interface_speed, 'args':[f'{destination}']}])
