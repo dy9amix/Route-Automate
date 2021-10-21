@@ -6,9 +6,9 @@ name: Coollink Mikrotik Speedtest
 # or API..
 on:
   workflow_dispatch:
-  #schedule:
+  schedule:
       # * is a special character in YAML so you have to quote this string
-      # - cron:  '0 1 1 * *'
+      - cron:  '0 7 * * *'
 
 jobs:
   # This workflow contains a single job
