@@ -1,5 +1,6 @@
 import ipaddress
 import ssl
+import ast
 import os
 import urllib3
 from librouteros import connect
@@ -33,7 +34,7 @@ def runInParallel(fns):
 def perform_speedtest(source_ip,dest_ip):
   mikrotik_username= os.environ['mikrotik_username']
   mikrotik_password=os.environ['mikrotik_password']
-  api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{source_ip}')
+  api = connect(username='backup', password='N3tb@ckup', host=f'{source_ip}')
   params = {
       'address': f'{dest_ip}',
       'protocol': 'udp',
@@ -47,14 +48,10 @@ def perform_speedtest(source_ip,dest_ip):
 
 def db_access():
     secret_file = open(f'secrect.json', 'w')
-    secret_file.write(json.dumps(os.environ['firebase_token']))
+    secret_file.write(json.dumps(ast.literal_eval(os.environ['firebase_token'])))
     secret_file.close()
-
     # Fetch the service account key JSON file contents
     cred_path = os.getcwd() + '/secrect.json'
-    f = open(cred_path,'r')
-    content = f.read()
-    print(content) 
     cred = credentials.Certificate(cred_path)
     # Initialize the app with a service account, granting admin privileges
     firebase_admin.initialize_app(cred, {
