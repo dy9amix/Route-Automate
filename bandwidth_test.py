@@ -34,11 +34,11 @@ def runInParallel(fns):
 def perform_speedtest(source_ip,dest_ip):
   mikrotik_username= os.environ['mikrotik_username']
   mikrotik_password=os.environ['mikrotik_password']
-  api = connect(username='backup', password='N3tb@ckup', host=f'{source_ip}')
+  api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{source_ip}')
   params = {
       'address': f'{dest_ip}',
       'protocol': 'udp',
-      'user': 'backup',
+      'user': f'{mikrotik_username}',
       'password': f'{mikrotik_password}',
       'direction': 'both',
       'duration': 10
@@ -131,7 +131,7 @@ def check_interface_speed(mkt_ip):
     network_address = address['address']
     if ipaddress.ip_address(f'{mkt_ip}') in ipaddress.ip_network(f'{network_address}', False).hosts():
       interface = address['interface']
-      ssh_client.connect(hostname=f'{mkt_ip}',username='backup',password='N3tb@ckup', port=22)
+      ssh_client.connect(hostname=f'{mkt_ip}',username=f'{mikrotik_username}',password=f'{mikrotik_password}', port=22)
       stdin,stdout,stderr = ssh_client.exec_command(f"interface monitor-traffic {interface} once")
       result_dic={}
       for line in iter(stdout.readline, ""):
