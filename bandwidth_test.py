@@ -127,7 +127,9 @@ def convert_bandwidth(band_val):
 
 def check_interface_speed(mkt_ip):
   time.sleep(4)
-  api = connect(username='backup', password='N3tb@ckup', host=f'{mkt_ip}')
+  mikrotik_username= os.environ['mikrotik_username']
+  mikrotik_password=os.environ['mikrotik_password']
+  api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{mkt_ip}')
   for address in list(api.path('ip', 'address')):
     network_address = address['address']
     if ipaddress.ip_address(f'{mkt_ip}') in ipaddress.ip_network(f'{network_address}', False).hosts():
@@ -153,8 +155,8 @@ def check_interface_speed(mkt_ip):
 
 pop_ips = db_access()
 for ip in pop_ips:
-  source = pop_ips['SOURCE']
-  destination = pop_ips['ACCOUNTS']
+  source = pop_ips['NOC']
+  destination = pop_ips['SOURCE']
   runInParallel([{'name':perform_speedtest, 'args':[f'{source}',f'{destination}']},
                   {'name':check_interface_speed, 'args':[f'{destination}']}])
 
