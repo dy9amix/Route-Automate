@@ -34,7 +34,7 @@ def runInParallel(fns):
 def perform_speedtest(source_ip,dest_ip):
   mikrotik_username= os.environ['mikrotik_username']
   mikrotik_password=os.environ['mikrotik_password']
-  api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{source_ip}')
+  api = connect(username='backup', password='N3tb@ckup', host=f'{source_ip}')
   params = {
       'address': f'{dest_ip}',
       'protocol': 'udp',
