@@ -15,10 +15,6 @@ import time
 import datetime
 import requests
 import json
-from requests import get
-
-ip = get('https://api.ipify.org').text
-print(f'My public IP address is: {ip}')
 
 ssh_client=paramiko.SSHClient()
 urllib3.disable_warnings()
