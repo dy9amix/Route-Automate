@@ -32,8 +32,8 @@ jobs:
         influxdb_organisation_id: ${{ secrets.INFLUXDB_ORGANISATION_ID }}
         influxdb_token: ${{ secrets.INFLUXDB_TOKEN }}
         mikrotik_password: ${{ secrets.MIKROTIK_PASSWORD }}
-        mikrotik_username: ${{ MIKROTIK_USERNAME }}
-        teams_webhook_url: ${{ TEAMS_WEBHOOK_URL }}
+        mikrotik_username: ${{ secrets.MIKROTIK_USERNAME }}
+        teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
       run: |
         python3 bandwidth_test.py
