@@ -131,7 +131,7 @@ def check_interface_speed(mkt_ip):
     network_address = address['address']
     if ipaddress.ip_address(f'{mkt_ip}') in ipaddress.ip_network(f'{network_address}', False).hosts():
       interface = address['interface']
-      ssh_client.connect(hostname=f'{mkt_ip}',username='backup',password='N3tb@ckup', port=2244)
+      ssh_client.connect(hostname=f'{mkt_ip}',username='backup',password='N3tb@ckup', port=22)
       stdin,stdout,stderr = ssh_client.exec_command(f"interface monitor-traffic {interface} once")
       result_dic={}
       for line in iter(stdout.readline, ""):
