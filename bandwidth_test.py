@@ -46,6 +46,7 @@ def perform_speedtest(source_ip,dest_ip):
   speedtest_arr = list(result)
 
 def db_access():
+    print(json.dumps(os.environ['firebase_token']))
     secret_file = open(f'secrect.json', 'w')
     secret_file.write(json.dumps(os.environ['firebase_token']))
     secret_file.close()
