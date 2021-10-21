@@ -19,24 +19,6 @@ ssh_client=paramiko.SSHClient()
 urllib3.disable_warnings()
 ssl.get_default_verify_paths()
 ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-api = connect(username='admin', password='!@#Supp0rt1', host='192.168.6.1')
-
-mikrotik_ips = {
-    "VI POP": "41.78.211.30",
-    "IKOTA POP": "197.234.34.1",
-    "LEKKI POP" : "192.168.27.1",
-    "TANGO POP": "197.234.38.1",
-    "IJORA POP": "192.168.4.52",
-    "CRESTVIEW POP": "197.234.57.1",
-    "MEDALLION POP" : "192.168.35.1",
-    "ABUJA POP" : "41.78.209.11",
-    "CRESTVIEW": "197.234.57.1",
-    "RACKCENTER": "197.234.51.2",
-    "SAKA 18": "192.168.5.4",
-    "SAKA 25": "192.168.5.17",
-    "ABUJA": "41.78.209.11",
-    "PORT HARCOURT": "197.234.32.2"
-}
 
 def runInParallel(fns):
   proc = []
@@ -49,25 +31,31 @@ def runInParallel(fns):
     p.join()
 
 def perform_speedtest(source_ip,dest_ip):
-    api = connect(username='backup', password='N3tb@ckup', host=f'{source_ip}')
-    params = {
-        'address': f'{dest_ip}',
-        'protocol': 'udp',
-        'user': 'backup',
-        'password': 'N3tb@ckup',
-        'direction': 'both',
-        'duration': 10
-    }
-    result = api(cmd='/tool/bandwidth-test', **params)
-    speedtest_arr = list(result)
+  mikrotik_username= os.environ['mikrotik_username']
+  mikrotik_password=os.environ['mikrotik_password']
+  api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{source_ip}')
+  params = {
+      'address': f'{dest_ip}',
+      'protocol': 'udp',
+      'user': 'backup',
+      'password': f'{mikrotik_password}',
+      'direction': 'both',
+      'duration': 10
+  }
+  result = api(cmd='/tool/bandwidth-test', **params)
+  speedtest_arr = list(result)
 
 def db_access():
+    secret_file = open(f'secrect.json', 'w')
+    secret_file.write(json.dumps(os.environ['firebase_token']))
+    secret_file.close()
+
     # Fetch the service account key JSON file contents
-    cred_path = os.getcwd() + '/coollink-routing-automation-firebase-adminsdk-fveid-a72cbfd68c.json'
+    cred_path = os.getcwd() + '/secrect.json'
     cred = credentials.Certificate(cred_path)
     # Initialize the app with a service account, granting admin privileges
     firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://coollink-routing-automation-default-rtdb.europe-west1.firebasedatabase.app/'
+        'databaseURL': f'{os.environ["firebase_url"]}'
     })
     # As an admin, the app has access to read and write all data, regradless of Security Rules
     ref = db.reference('/')
@@ -75,7 +63,8 @@ def db_access():
     return ip_addr_list
 
 def send_teams_message(message):
-  webhook_url = "https://coollinkng0.webhook.office.com/webhookb2/b3918fce-f6ff-4d87-90d0-3139268b7667@ad7e4552-adb0-4afd-88ea-a790cf18973d/IncomingWebhook/17a9cfc229de42b2a9c5a442ab8b4130/3b5b7153-0d3d-4723-9e96-a258f998aaee"
+  teams_webhook = os.environ['teams_webhook_url']
+  webhook_url = f"{teams_webhook}"
   mikrotik_name = message["Name"]
   test_time = message["Time"]
   upload_speed = message["Upload"]
@@ -109,8 +98,8 @@ def send_teams_message(message):
 
 def upload_to_influxdb(values):
   bucket = "Bandwidth"
-  org = "95d7a60f56db87a4"
-  token = "l1yV1Rpqw70oMPW5rwPX_5YgsthJXf9624uNE0uVaLImzP0s9h08DcQQ6q2p3jpzRraydEQ2iHQ_8g2AQ66RLg=="
+  org = f"{os.environ['influxdb_organisation_id']}"
+  token = f"{os.environ['influxdb_token']}"
   # Store the URL of your InfluxDB instance
   url="https://us-east-1-1.aws.cloud2.influxdata.com"
 
