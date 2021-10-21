@@ -1,0 +1,6 @@
+influxdb_client==1.21.0
+urllib3==1.25.8
+librouteros==3.1.0
+paramiko==2.7.2
+requests==2.22.0
+firebase_admin==5.0.2

@@ -1,8 +1,11 @@
 from librouteros import connect
 import paramiko
+import os
 
 def check_availability(source_addr, dest_addr):
-    api = connect(username='backup', password='N3tb@ckup', host=f'{source_addr}')
+    mikrotik_username= os.environ['mikrotik_username']
+    mikrotik_password=os.environ['mikrotik_password']
+    api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{source_ip}')
     params = {
         'src-address': f'{source_addr}',
         'address': f'{dest_addr}',
