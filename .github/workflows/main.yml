@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
     # Runs a single command using the runners shell
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip3.8 install -r requirements.txt
       
     - name: Run python script
 
@@ -36,4 +36,4 @@ jobs:
         teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
       run: |
-        python3 bandwidth_test.py
+        python3.8 bandwidth_test.py
