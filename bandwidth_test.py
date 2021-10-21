@@ -1,5 +1,6 @@
 import ipaddress
 import ssl
+import ast
 import os
 import urllib3
 from librouteros import connect
@@ -46,9 +47,8 @@ def perform_speedtest(source_ip,dest_ip):
   speedtest_arr = list(result)
 
 def db_access():
-    print(json.dumps(os.environ['firebase_token']))
     secret_file = open(f'secrect.json', 'w')
-    secret_file.write(json.dumps(os.environ['firebase_token']))
+    secret_file.write(json.dumps(ast.literal_eval(os.environ['firebase_token'])))
     secret_file.close()
     # Fetch the service account key JSON file contents
     cred_path = os.getcwd() + '/secrect.json'
