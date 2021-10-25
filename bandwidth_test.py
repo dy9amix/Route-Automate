@@ -153,7 +153,7 @@ def check_interface_speed(mkt_ip):
 pop_ips = db_access()
 for ip in pop_ips:
   source = pop_ips['NOC']
-  destination = pop_ips['SOURCE']
+  destination = pop_ips['ip']
   runInParallel([{'name':perform_speedtest, 'args':[f'{source}',f'{destination}']},
                   {'name':check_interface_speed, 'args':[f'{destination}']}])
 
