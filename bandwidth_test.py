@@ -119,7 +119,7 @@ def convert_bandwidth(band_val):
     return float(band_val.split('M')[0])
   elif band_val[len(band_val) - 4] == 'G':
     return float(band_val.split('G')[0])*1000
-  else:
+  elif band_val[len(band_val) - 4] == 'k':
     return float(band_val.split('k')[0])/1000
 
 def check_interface_speed(mkt_ip):
@@ -153,7 +153,7 @@ def check_interface_speed(mkt_ip):
 pop_ips = db_access()
 for ip in pop_ips:
   source = pop_ips['NOC']
-  destination = pop_ips['ip']
+  destination = pop_ips['VI']
   runInParallel([{'name':perform_speedtest, 'args':[f'{source}',f'{destination}']},
                   {'name':check_interface_speed, 'args':[f'{destination}']}])
 
