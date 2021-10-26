@@ -1,0 +1,39 @@
+# This is a basic workflow that is manually triggered
+
+name: Coollink Mikrotik Speedtest
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API..
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+jobs:
+  # This workflow contains a single job
+  Deploy_to_Production:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    # Runs a single command using the runners shell
+    - name: Install dependencies
+      run: pip3.8 install -r requirements.txt --user
+      
+    - name: Run python script
+
+      env:
+        firebase_token: ${{ secrets.FIREBASE_TOKEN }}
+        firebase_url: ${{ secrets.FIREBASE_URL }}
+        influxdb_organisation_id: ${{ secrets.INFLUXDB_ORGANISATION_ID }}
+        influxdb_token: ${{ secrets.INFLUXDB_TOKEN }}
+        mikrotik_password: ${{ secrets.MIKROTIK_PASSWORD }}
+        mikrotik_username: ${{ secrets.MIKROTIK_USERNAME }}
+        teams_webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+      run: |
+        cd Testcases
+        python3.8 auth_testcase.py

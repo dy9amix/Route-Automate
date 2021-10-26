@@ -127,28 +127,26 @@ def check_interface_speed(mkt_ip):
   mikrotik_username= os.environ['mikrotik_username']
   mikrotik_password=os.environ['mikrotik_password']
   api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{mkt_ip}')
+  mkt_hostname = list(api.path('system', 'identity'))
   for address in list(api.path('ip', 'address')):
     network_address = address['address']
     if ipaddress.ip_address(f'{mkt_ip}') in ipaddress.ip_network(f'{network_address}', False).hosts():
       interface = address['interface']
       ssh_client.connect(hostname=f'{mkt_ip}',username=f'{mikrotik_username}',password=f'{mikrotik_password}', port=22)
       stdin,stdout,stderr = ssh_client.exec_command(f"interface monitor-traffic {interface} once")
-      result_dic={}
-      for line in iter(stdout.readline, ""):
-        if line == '\r\n':
-          continue
-        else:
-          lst = line.split(':')
-          res_dct = {lst[i].strip(): lst[i + 1].strip().replace('\r\n',"") for i in range(0, len(lst), 2)}
-          result_dic.update(res_dct)
-      mkt_hostname = list(api.path('system', 'identity'))
+      lst = stdout.read().decode("utf-8").replace(" ", "").splitlines()
+      download_lst = lst[2].split(":")
+      upload_lst = lst[8].split(":")
+      result_dict = {download_lst[0]: download_lst[1], upload_lst[0]:upload_lst[1]}
       speed_res = {
         "Name": mkt_hostname[0]['name'],
-        "Upload": convert_bandwidth(result_dic['tx-bits-per-second']),
-        "Download": convert_bandwidth(result_dic["rx-bits-per-second"])
+        "Upload": convert_bandwidth(result_dict['tx-bits-per-second']),
+        "Download": convert_bandwidth(result_dict["rx-bits-per-second"])
       }
       print(speed_res)
       upload_to_influxdb(speed_res)
+    else:
+      print(f"Unable to find speedtest interface for {mkt_hostname[0]['name']}")
 
 pop_ips = db_access()
 for ip in pop_ips:
