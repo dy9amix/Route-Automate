@@ -26,10 +26,8 @@ def db_access():
 
 class BGP_Reflex:
     def __init__(self) -> None:
-        # self.mikrotik_username= os.environ['mikrotik_username']
-        # self.mikrotik_password=os.environ['mikrotik_password']
-        self.mikrotik_username= 'backup'
-        self.mikrotik_password= 'N3tb@ckup'
+        self.mikrotik_username= os.environ['mikrotik_username']
+        self.mikrotik_password=os.environ['mikrotik_password']
 
     def check_availability(self,source_addr, dest_addr):
         api = connect(username=f'{self.mikrotik_username}', password=f'{self.mikrotik_password}', host=f'{self.source_addr}')
