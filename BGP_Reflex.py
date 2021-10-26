@@ -1,3 +1,4 @@
+from _typeshed import Self
 from librouteros import connect
 import ast
 import json
@@ -23,19 +24,37 @@ def db_access():
     ip_addr_list = ref.get()
     return ip_addr_list
 
-def check_availability(source_addr, dest_addr):
-    mikrotik_username= os.environ['mikrotik_username']
-    mikrotik_password=os.environ['mikrotik_password']
-    api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{source_ip}')
-    params = {
-        'src-address': f'{source_addr}',
-        'address': f'{dest_addr}',
-        'count': 20
-    }
-    result = api(cmd='/ping', **params)
-    ping_arr = list(result)
-    print(ping_arr[len(ping_arr)-1] )
+class BGP_Reflex:
+    def __init__(self) -> None:
+        # self.mikrotik_username= os.environ['mikrotik_username']
+        # self.mikrotik_password=os.environ['mikrotik_password']
+        self.mikrotik_username= 'backup'
+        self.mikrotik_password= 'N3tb@ckup'
 
+    def check_availability(self,source_addr, dest_addr):
+        api = connect(username=f'{self.mikrotik_username}', password=f'{self.mikrotik_password}', host=f'{self.source_addr}')
+        params = {
+            'src-address': f'{source_addr}',
+            'address': f'{dest_addr}',
+            'count': 20
+        }
+        result = api(cmd='/ping', **params)
+        ping_arr = list(result)
+        return ping_arr[len(ping_arr)-1]
 
+    def bgp_react(self):
+        ping_result = BGP_Reflex.check_availability()
+        if ping_result['packet-loss'] >= 20:
+            api_server_ip = os.environ['api_server_ip']
+            url = f'http://{api_server_ip}:32598/fwb/bgpshutunshut'
+            payload = {
+                'source_addr': self.source_addr,
+                'remote_addr': self.dest_addr,
+                'username': self.mikrotik_username,
+                'password': self.mikrotik_password,
+                'deviceType': self,
+                'toShutdown': self,
+            }
+            requests.post()
 
-check_availability('41.78.211.50','41.78.211.117')
+# check_availability('41.78.211.50','41.78.211.117')

@@ -47,28 +47,24 @@ def perform_speedtest(source_ip,dest_ip):
   speedtest_arr = list(result)
 
 def db_access():
-    secret_file = open(f'secrect.json', 'w')
-    secret_file.write(json.dumps(ast.literal_eval(os.environ['firebase_token'])))
-    secret_file.close()
-    # Fetch the service account key JSON file contents
-    cred_path = os.getcwd() + '/secrect.json'
-    cred = credentials.Certificate(cred_path)
-    # Initialize the app with a service account, granting admin privileges
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': f'{os.environ["firebase_url"]}'
-    })
-    # As an admin, the app has access to read and write all data, regradless of Security Rules
-    ref = db.reference('/')
-    ip_addr_list = ref.get()
-    return ip_addr_list
+  secret_file = open(f'secrect.json', 'w')
+  secret_file.write(json.dumps(ast.literal_eval(os.environ['firebase_token'])))
+  secret_file.close()
+  # Fetch the service account key JSON file contents
+  cred_path = os.getcwd() + '/secrect.json'
+  cred = credentials.Certificate(cred_path)
+  # Initialize the app with a service account, granting admin privileges
+  firebase_admin.initialize_app(cred, {
+      'databaseURL': f'{os.environ["firebase_url"]}'
+  })
+  # As an admin, the app has access to read and write all data, regradless of Security Rules
+  ref = db.reference('/')
+  ip_addr_list = ref.get()
+  return ip_addr_list
 
-def send_teams_message(message):
+def send_teams_message():
   teams_webhook = os.environ['teams_webhook_url']
   webhook_url = f"{teams_webhook}"
-  mikrotik_name = message["Name"]
-  test_time = message["Time"]
-  upload_speed = message["Upload"]
-  download_speed = message["Download"]
   headers = {
     "Content-Type":"application/json"
   }
@@ -76,20 +72,14 @@ def send_teams_message(message):
     "@type": "MessageCard",
     "@context": "http://schema.org/extensions",
     "themeColor": "0076D7",
-    "summary": f"Speedtest Result for {mikrotik_name}",
+    "summary": f"Speedtest Result for POPs",
     "sections": [{
-        "activityTitle": f"Speedtest Result for {mikrotik_name}",
+        "activityTitle": f"Speedtest Result for POPs",
         "activitySubtitle": "Powered by magic",
         "activityImage": "https://img.icons8.com/bubbles/100/000000/fortune-teller.png",
         "facts": [{
-            "name": "Time",
-            "value": f"{test_time}"
-        }, {
-            "name": "Upload",
-            "value": f"{upload_speed}"
-        }, {
-            "name": "Download",
-            "value": f"{download_speed}"
+            "name":"Message",
+            "value":"Speedtest complete. Results can be found at http://192.168.6.253:3000"
         }],
         "markdown": True
     }]
@@ -121,34 +111,35 @@ def convert_bandwidth(band_val):
     return float(band_val.split('G')[0])*1000
   elif band_val[len(band_val) - 4] == 'k':
     return float(band_val.split('k')[0])/1000
+  else:
+    return 0
 
 def check_interface_speed(mkt_ip):
   time.sleep(4)
   mikrotik_username= os.environ['mikrotik_username']
   mikrotik_password=os.environ['mikrotik_password']
   api = connect(username=f'{mikrotik_username}', password=f'{mikrotik_password}', host=f'{mkt_ip}')
+  mkt_hostname = list(api.path('system', 'identity'))
   for address in list(api.path('ip', 'address')):
     network_address = address['address']
     if ipaddress.ip_address(f'{mkt_ip}') in ipaddress.ip_network(f'{network_address}', False).hosts():
       interface = address['interface']
-      ssh_client.connect(hostname=f'{mkt_ip}',username=f'{mikrotik_username}',password=f'{mikrotik_password}', port=22)
+      ssh_client.connect(hostname=f'{mkt_ip}',username=f'{mikrotik_username}',password=f'{mikrotik_password}', port=2244)
       stdin,stdout,stderr = ssh_client.exec_command(f"interface monitor-traffic {interface} once")
-      result_dic={}
-      for line in iter(stdout.readline, ""):
-        if line == '\r\n':
-          continue
-        else:
-          lst = line.split(':')
-          res_dct = {lst[i].strip(): lst[i + 1].strip().replace('\r\n',"") for i in range(0, len(lst), 2)}
-          result_dic.update(res_dct)
-      mkt_hostname = list(api.path('system', 'identity'))
+      lst = stdout.read().decode("utf-8").replace(" ", "").splitlines()
+      download_lst = lst[2].split(":")
+      upload_lst = lst[8].split(":")
+      result_dict = {download_lst[0]: download_lst[1], upload_lst[0]:upload_lst[1]}
       speed_res = {
         "Name": mkt_hostname[0]['name'],
-        "Upload": convert_bandwidth(result_dic['tx-bits-per-second']),
-        "Download": convert_bandwidth(result_dic["rx-bits-per-second"])
+        "Upload": convert_bandwidth(result_dict['tx-bits-per-second']),
+        "Download": convert_bandwidth(result_dict["rx-bits-per-second"])
       }
       print(speed_res)
       upload_to_influxdb(speed_res)
+      break
+    else:
+      print(f"Unable to find speedtest interface for {mkt_hostname[0]['name']}")
 
 pop_ips = db_access()
 for ip in pop_ips:
@@ -156,5 +147,6 @@ for ip in pop_ips:
   destination = pop_ips[ip]
   runInParallel([{'name':perform_speedtest, 'args':[f'{source}',f'{destination}']},
                   {'name':check_interface_speed, 'args':[f'{destination}']}])
+send_teams_message()
 
 
