@@ -47,28 +47,24 @@ def perform_speedtest(source_ip,dest_ip):
   speedtest_arr = list(result)
 
 def db_access():
-    secret_file = open(f'secrect.json', 'w')
-    secret_file.write(json.dumps(ast.literal_eval(os.environ['firebase_token'])))
-    secret_file.close()
-    # Fetch the service account key JSON file contents
-    cred_path = os.getcwd() + '/secrect.json'
-    cred = credentials.Certificate(cred_path)
-    # Initialize the app with a service account, granting admin privileges
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': f'{os.environ["firebase_url"]}'
-    })
-    # As an admin, the app has access to read and write all data, regradless of Security Rules
-    ref = db.reference('/')
-    ip_addr_list = ref.get()
-    return ip_addr_list
+  secret_file = open(f'secrect.json', 'w')
+  secret_file.write(json.dumps(ast.literal_eval(os.environ['firebase_token'])))
+  secret_file.close()
+  # Fetch the service account key JSON file contents
+  cred_path = os.getcwd() + '/secrect.json'
+  cred = credentials.Certificate(cred_path)
+  # Initialize the app with a service account, granting admin privileges
+  firebase_admin.initialize_app(cred, {
+      'databaseURL': f'{os.environ["firebase_url"]}'
+  })
+  # As an admin, the app has access to read and write all data, regradless of Security Rules
+  ref = db.reference('/')
+  ip_addr_list = ref.get()
+  return ip_addr_list
 
-def send_teams_message(message):
+def send_teams_message():
   teams_webhook = os.environ['teams_webhook_url']
   webhook_url = f"{teams_webhook}"
-  mikrotik_name = message["Name"]
-  test_time = message["Time"]
-  upload_speed = message["Upload"]
-  download_speed = message["Download"]
   headers = {
     "Content-Type":"application/json"
   }
@@ -76,20 +72,14 @@ def send_teams_message(message):
     "@type": "MessageCard",
     "@context": "http://schema.org/extensions",
     "themeColor": "0076D7",
-    "summary": f"Speedtest Result for {mikrotik_name}",
+    "summary": f"Speedtest Result for POPs",
     "sections": [{
-        "activityTitle": f"Speedtest Result for {mikrotik_name}",
+        "activityTitle": f"Speedtest Result for POPs",
         "activitySubtitle": "Powered by magic",
         "activityImage": "https://img.icons8.com/bubbles/100/000000/fortune-teller.png",
         "facts": [{
-            "name": "Time",
-            "value": f"{test_time}"
-        }, {
-            "name": "Upload",
-            "value": f"{upload_speed}"
-        }, {
-            "name": "Download",
-            "value": f"{download_speed}"
+            "name":"Message",
+            "value":"Speedtest complete. Results can be found at http://192.168.6.253:3000"
         }],
         "markdown": True
     }]
@@ -147,6 +137,7 @@ def check_interface_speed(mkt_ip):
       }
       print(speed_res)
       upload_to_influxdb(speed_res)
+      break
     else:
       print(f"Unable to find speedtest interface for {mkt_hostname[0]['name']}")
 
@@ -156,5 +147,6 @@ for ip in pop_ips:
   destination = pop_ips[ip]
   runInParallel([{'name':perform_speedtest, 'args':[f'{source}',f'{destination}']},
                   {'name':check_interface_speed, 'args':[f'{destination}']}])
+send_teams_message()
 
 
