@@ -11,7 +11,7 @@ on:
       - master
 jobs:
   # This workflow contains a single job
-  Test connection to Mikrotik:
+  Test_connection_to_Mikrotik:
     # The type of runner that the job will run on
     runs-on: self-hosted
 
