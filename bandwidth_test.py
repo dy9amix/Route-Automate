@@ -121,6 +121,8 @@ def convert_bandwidth(band_val):
     return float(band_val.split('G')[0])*1000
   elif band_val[len(band_val) - 4] == 'k':
     return float(band_val.split('k')[0])/1000
+  else:
+    return 0
 
 def check_interface_speed(mkt_ip):
   time.sleep(4)
@@ -132,7 +134,7 @@ def check_interface_speed(mkt_ip):
     network_address = address['address']
     if ipaddress.ip_address(f'{mkt_ip}') in ipaddress.ip_network(f'{network_address}', False).hosts():
       interface = address['interface']
-      ssh_client.connect(hostname=f'{mkt_ip}',username=f'{mikrotik_username}',password=f'{mikrotik_password}', port=22)
+      ssh_client.connect(hostname=f'{mkt_ip}',username=f'{mikrotik_username}',password=f'{mikrotik_password}', port=2244)
       stdin,stdout,stderr = ssh_client.exec_command(f"interface monitor-traffic {interface} once")
       lst = stdout.read().decode("utf-8").replace(" ", "").splitlines()
       download_lst = lst[2].split(":")

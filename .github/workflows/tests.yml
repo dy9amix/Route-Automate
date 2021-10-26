@@ -11,7 +11,7 @@ on:
       - master
 jobs:
   # This workflow contains a single job
-  Deploy_to_Production:
+  Test connection to Mikrotik:
     # The type of runner that the job will run on
     runs-on: self-hosted
 
